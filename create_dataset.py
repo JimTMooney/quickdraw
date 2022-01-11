@@ -153,9 +153,10 @@ def add_strokes(drawing, class_dir, file_idx):
         center_stroke[0][0] = 0.0
         center_stroke[0][1] = 0.0
         center_stroke = center_stroke.clone().detach()
-        filename = os.path.join(class_dir, str(file_idx) + '-' + str(stroke_idx) + '.pt')
-        torch.save(torch.tensor(center_stroke), filename)
-        stroke_idx += 1
+        if center_stroke.shape[0] > 1 and center_stroke[1][0] != 0.0 and center_stroke[1][1] != 0.0:
+            filename = os.path.join(class_dir, str(file_idx) + '-' + str(stroke_idx) + '.pt')
+            torch.save(torch.tensor(center_stroke), filename)
+            stroke_idx += 1
         
 def stroke_data_constructor():
     print('\n\n\nBuilding strokes dataset')
@@ -180,5 +181,5 @@ def stroke_data_constructor():
     
 
 if __name__ == '__main__':
-    full_data_constructor()
+#     full_data_constructor()
     stroke_data_constructor()
