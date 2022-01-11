@@ -13,6 +13,8 @@ This will pull in 75k (70k train, 2.5k validation, 2.5k test) total sketches acr
 python3 create_dataset.py
 ```
 
+Both of these datasets also trim the size of the sketches to be sequences of no more than 150 key points.
+
 
 <a id="1">[1]</a> 
 Multi-Graph Transformer for Free-Hand Sketch Recognition by Peng Xu, Chaitanya K Joshi, Xavier Bresson, ArXiv 2019
