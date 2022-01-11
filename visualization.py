@@ -37,3 +37,63 @@ def render_strokes(file_idx, class_name, split):
     for idx, stroke in enumerate(strokes):
         drawing = torch.load(stroke)
         render_drawing(drawing, class_name, ax[idx])
+        
+        
+def plot_histograms(class_str="all"):
+    title = "Distributions of lengths, # strokes, strokes/sketch for " + class_str + " sketches"
+    all_path = os.path.join(os.getcwd(), "data_stats", "strokes", class_str)
+    selected_plots = ['lengths', 'n_strokes', 'stroke_lengths']
+    splits = ['train', 'valid', 'test']
+    max_szs = [150, 63, 150]
+
+    width = 20.
+    height = 20.
+    fig, ax = plt.subplots(3, 3, figsize=(height, width))
+    fontsize = 30
+
+    fig.suptitle(title, fontsize=fontsize, y=.93)
+    for i in range(3):
+        file = os.path.join(all_path, selected_plots[i] + '.pt')
+        cur_tensor = torch.load(file)
+        for j in range(3):
+            if j == 0:
+                ax[i][j].set_ylabel(selected_plots[i], fontsize=fontsize)
+            if i == 2:
+                ax[i][j].set_xlabel(splits[j], fontsize=fontsize)
+            subsection = cur_tensor[:max_szs[i], j]
+            split = splits[j]
+            ax[i][j].bar(np.arange(len(subsection)), subsection)
+            
+            
+def stats_printer(class_str="all"):
+    print("Collecting Stats on the " + class_str + " class")
+    all_path = os.path.join(os.getcwd(), "data_stats", "strokes", class_str)
+    length_file = os.path.join(all_path, "lengths.pt")
+    all_lengths = torch.load(length_file)
+    truncate_file = os.path.join(all_path, "truncate.pt")
+    truncated = torch.load(truncate_file)
+    
+    splits = ['Train', 'Valid', 'Test']
+    for idx, length in enumerate(all_lengths.T):
+        split = splits[idx]
+        print("\n\n\nGathering Statistics for " + class_str + " Lengths in the " + split + " split")
+        total_length = 0
+        for l_idx, ele in enumerate(length):
+            total_length += ele * (l_idx+1)
+        mean = total_length / torch.sum(length)
+        largest = 150
+        smallest = 2
+
+        running_sum = 0
+        for l_idx, ele in enumerate(length):
+            running_sum += (((l_idx + 1 - mean) * torch.sqrt(ele))**2)
+        running_sum /= torch.sum(length)
+        std = torch.sqrt(running_sum)
+
+        proportion_truncated = truncated[idx] / torch.sum(length)
+
+        print("mean = ", mean.item())
+        print("std = ", std.item())
+        print("max = ", largest)
+        print("min = ", smallest)
+        print("Proportion truncated = ", proportion_truncated.item())
